@@ -26,11 +26,8 @@ def transcribe():
         wav_file = request.files['audio_data']
         wav_file.save(save_path)
 
-        if language == 'english':
-            result = audio_model.transcribe(save_path, language='english')
-        else:
-            result = audio_model.transcribe(save_path)
-
+        result = audio_model.transcribe(save_path, language=language)
+        print(f"result: {result}, result.text: {result['text']}, language: {language}")
         return result['text']
     else:
         return "This endpoint only processes POST wav blob"

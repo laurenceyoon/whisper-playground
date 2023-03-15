@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import withStyles from "@material-ui/core/styles/withStyles";
 import Typography from "@material-ui/core/Typography";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -13,29 +14,45 @@ import { PulseLoader } from "react-spinners";
 const useStyles = () => ({
   root: {
     display: 'flex',
-    flex: '1',
-    margin: '100px 0px 100px 0px',
-    alignItems: 'center',
-    textAlign: 'center',
+    margin: '10px 10px 10px 10px',
     flexDirection: 'column',
+    color: '#ededf8',
+    fontFamily: 'Helvetica Neue',
+    fontWeight: 'bold',
+    fontStyle: 'oblique'
+  },
+  header: {
   },
   title: {
-    marginBottom: '30px',
+    float: 'left',
+    textAlign: 'left',
+    width: '50%',
   },
-  settingsSection: {
-    marginBottom: '20px',
-    display: 'flex',
-    width: '100%',
+  description: {
+    float: 'left',
+    textAlign: 'right',
+    width: '50%',
   },
-  buttonsSection: {
-    marginBottom: '40px',
+  originalLyrics: {
+    textAlign: 'center',
+    fontSize: '44px'
+  },
+  translationLyrics: {
+    textAlign: 'center',
+    fontSize: '38px'
   },
   recordIllustration: {
-    width: '100px',
-  }
+    textAlign: 'center',
+  },
+  buttonsSection: {
+    textAlign: 'center',
+    margin: '10px',
+  },
 });
 
 const App = ({ classes }) => {
+  const handle = useFullScreenHandle();
+
   const [transcribedData, setTranscribedData] = useState([]);
   const [interimTranscribedData, ] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -83,7 +100,7 @@ const App = ({ classes }) => {
   }
 
   function onData(recordedBlob) {
-    // console.log('chunk of real-time data is: ', recordedBlob);
+    console.log('chunk of real-time data is: ', recordedBlob);
   }
 
   function onStop(recordedBlob) {
@@ -104,6 +121,7 @@ const App = ({ classes }) => {
     formData.append("language", selectedLangRef.current)
     formData.append("model_size", modelOptions[selectedModelRef.current])
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
+    console.log("formData: ", formData);
     axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })
       .then((res) => {
         setTranscribedData(oldData => [...oldData, res.data])
@@ -117,32 +135,41 @@ const App = ({ classes }) => {
   }
 
   return (
-    <div className={classes.root}>
-      <div className={classes.title}>
-        <Typography variant="h3">
-          Whisper Playground <span role="img" aria-label="microphone-emoji">🎤</span>
-        </Typography>
+    <FullScreen handle={handle}>
+      <div className={classes.root}>
+        <div className={classes.header}>
+          <div className={classes.title}>
+            <Typography variant="h6">
+              모차르트 마술피리 中 밤의 여왕 아리아
+            </Typography>
+          </div>
+          <div className={classes.description}>
+            <Typography variant="span">
+              * 스코어 팔로잉 기술을 통해 실시간으로 가사를 추적 중입니다.
+            </Typography>
+          </div>
+        </div>
+        <div className={classes.originalLyrics}>
+          {/* <TranscribeOutput transcribedText={transcribedData} interimTranscribedText={interimTranscribedData} /> */}
+          Wenn nicht, durch die, Sarastroh wird erblassen!
+        </div>
+        <div className={classes.translationLyrics}>
+          {/* <TranscribeOutput transcribedText={transcribedData} interimTranscribedText={interimTranscribedData} /> */}
+          만약, 너로 인해, 자라스트로가 죽지 않는다면!
+        </div>
+        <div className={classes.recordIllustration}>
+          <ReactMic record={isRecording} className="sound-wave" onStop={onStop}
+            onData={onData} strokeColor="#f6f6ef" backgroundColor="#000000" />
+        </div>
+        <div className={classes.buttonsSection} >
+          {!isRecording && !isTranscribing && <Button onClick={startRecording} variant="primary">Start</Button>}
+          {(isRecording || isTranscribing) && <Button onClick={stopRecording} variant="danger" disabled={stopTranscriptionSessionRef.current}>Stop</Button>}
+        </div>
+        <div className={classes.buttonsSection} >
+          <Button onClick={handle.enter} variant="light">full screen</Button>
+        </div>
       </div>
-      <div className={classes.settingsSection}>
-        <SettingsSections disabled={isTranscribing || isRecording} possibleLanguages={supportedLanguages} selectedLanguage={selectedLanguage}
-          onLanguageChange={setSelectedLanguage} modelOptions={modelOptions} selectedModel={selectedModel} onModelChange={setSelectedModel}
-          transcribeTimeout={transcribeTimeout} onTranscribeTiemoutChanged={handleTranscribeTimeoutChange} />
-      </div>
-      <div className={classes.buttonsSection} >
-        {!isRecording && !isTranscribing && <Button onClick={startRecording} variant="primary">Start transcribing</Button>}
-        {(isRecording || isTranscribing) && <Button onClick={stopRecording} variant="danger" disabled={stopTranscriptionSessionRef.current}>Stop</Button>}
-      </div>
-
-      <div className="recordIllustration">
-        <ReactMic record={isRecording} className="sound-wave" onStop={onStop}
-          onData={onData} strokeColor="#0d6efd" backgroundColor="#f6f6ef" />
-      </div>
-
-      <div>
-        <TranscribeOutput transcribedText={transcribedData} interimTranscribedText={interimTranscribedData} />
-        <PulseLoader sizeUnit={"px"} size={20} color="purple" loading={isTranscribing} />
-      </div>
-    </div>
+    </FullScreen>
   );
 }
 
