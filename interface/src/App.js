@@ -19,7 +19,6 @@ const useStyles = () => ({
     color: '#ededf8',
     fontFamily: 'Helvetica Neue',
     fontWeight: 'bold',
-    fontStyle: 'oblique'
   },
   header: {
   },
@@ -35,11 +34,13 @@ const useStyles = () => ({
   },
   originalLyrics: {
     textAlign: 'center',
-    fontSize: '44px'
+    fontSize: '44px',
+    fontStyle: 'oblique'
   },
   translationLyrics: {
     textAlign: 'center',
-    fontSize: '38px'
+    fontSize: '38px',
+    fontStyle: 'oblique'
   },
   recordIllustration: {
     textAlign: 'center',
@@ -47,6 +48,9 @@ const useStyles = () => ({
   buttonsSection: {
     textAlign: 'center',
     margin: '10px',
+  },
+  fullScreen: {
+    display: 'none'
   },
 });
 
@@ -77,7 +81,14 @@ const App = ({ classes }) => {
 
   const modelOptions = ['tiny', 'base', 'small', 'medium', 'large', 'large-v1']
 
+  const onKeyDown = (event) => {
+    if (event.key === 'f' || 'ㄹ') {
+      document.getElementById('button').click();
+    }
+  };
+
   useEffect(() => {
+    document.addEventListener('keydown', onKeyDown);
     return () => clearInterval(intervalRef.current);
   }, []);
 
@@ -144,7 +155,7 @@ const App = ({ classes }) => {
             </Typography>
           </div>
           <div className={classes.description}>
-            <Typography variant="span">
+            <Typography variant="body1">
               * 스코어 팔로잉 기술을 통해 실시간으로 가사를 추적 중입니다.
             </Typography>
           </div>
@@ -165,8 +176,8 @@ const App = ({ classes }) => {
           {!isRecording && !isTranscribing && <Button onClick={startRecording} variant="primary">Start</Button>}
           {(isRecording || isTranscribing) && <Button onClick={stopRecording} variant="danger" disabled={stopTranscriptionSessionRef.current}>Stop</Button>}
         </div>
-        <div className={classes.buttonsSection} >
-          <Button onClick={handle.enter} variant="light">full screen</Button>
+        <div className={classes.fullScreen} >
+          <button id="button" onClick={handle.enter} variant="light">full screen</button>
         </div>
       </div>
     </FullScreen>
